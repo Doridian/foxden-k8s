@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mastodon-twitter-poster-web-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-path: /
+    nginx.ingress.kubernetes.io/session-cookie-change-on-failure: 'true'
+spec:
+  ingressClassName: nginx
+  defaultBackend:
+    service:
+      name: mastodon-twitter-poster-web
+      port:
+        number: 3000
+  tls:
+  - hosts:
+      - crossposter.f0x.es
+    secretName: mastodon-twitter-poster-cert
+  rules:
+  - host: crossposter.f0x.es
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: mastodon-twitter-poster-web
+            port:
+              number: 3000

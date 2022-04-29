@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mastodon-twitter-poster-sidekiq-default
+  labels:
+    app: mastodon-twitter-poster-sidekiq-default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mastodon-twitter-poster-sidekiq-default
+  template:
+    metadata:
+      labels:
+        app: mastodon-twitter-poster-sidekiq-default
+    spec:
+      containers:
+      - name: mastodon-twitter-poster-sidekiq-default
+        image: ghcr.io/doridian/mastodon-twitter-poster/mastodon-twitter-poster:latest
+        command: ["bundle", "exec", "sidekiq", "-c", "5", "-q", "default"]
+        envFrom:
+        - secretRef:
+            name: mastodon-twitter-poster-env
+        resources:
+          requests:
+            cpu: 100m
+            memory: 300Mi
+          limits:
+            cpu: 400m
+            memory: 600Mi

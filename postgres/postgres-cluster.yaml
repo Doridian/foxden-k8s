@@ -20,7 +20,9 @@ spec:
     - superuser
     - createdb
     mastodon: []
+    mastodon_twitter_poster: []
   databases:
     mastodon_production: mastodon
+    mastodon_twitter_poster_production: mastodon_twitter_poster
   postgresql:
     version: "14"
