@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mastodon-web
+  labels:
+    app: mastodon-web
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mastodon-web
+  template:
+    metadata:
+      labels:
+        app: mastodon-web
+    spec:
+      containers:
+      - name: mastodon-web
+        image: ghcr.io/doridian/mastodon-docker/mastodon-docker
+        command: ["bash", "-c", "ln -sf /secrets/env-file /mastodon/.env; rm -f /mastodon/tmp/pids/server.pid; bundle exec rails s -p 3000"]
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        ports:
+        - containerPort: 3000
+        envFrom:
+        - secretRef:
+            name: mastodon-env
+        resources:
+          requests:
+            cpu: 100m
+            memory: 300Mi
+          limits:
+            cpu: 400m
+            memory: 600Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mastodon-web
+  labels:
+    app: mastodon-web
+spec:
+  selector:
+    app: mastodon-web
+  ports:
+    - port: 3000
+      targetPort: 3000
+  clusterIP: None
+  type: ClusterIP

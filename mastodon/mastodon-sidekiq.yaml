@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mastodon-sidekiq-default
+  labels:
+    app: mastodon-sidekiq-default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mastodon-sidekiq-default
+  template:
+    metadata:
+      labels:
+        app: mastodon-sidekiq-default
+    spec:
+      containers:
+      - name: mastodon-sidekiq-default
+        image: ghcr.io/doridian/mastodon-docker/mastodon-docker
+        command: ["bundle", "exec", "sidekiq", "-q", "default,push,mailers,pull"]
+        envFrom:
+        - secretRef:
+            name: mastodon-env
+        resources:
+          requests:
+            cpu: 100m
+            memory: 300Mi
+          limits:
+            cpu: 400m
+            memory: 600Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mastodon-sidekiq-scheduler
+  labels:
+    app: mastodon-sidekiq-scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mastodon-sidekiq-scheduler
+  template:
+    metadata:
+      labels:
+        app: mastodon-sidekiq-scheduler
+    spec:
+      containers:
+      - name: mastodon-sidekiq-scheduler
+        image: ghcr.io/doridian/mastodon-docker/mastodon-docker
+        command: ["bundle", "exec", "sidekiq", "-q", "scheduler"]
+        envFrom:
+        - secretRef:
+            name: mastodon-env
+        resources:
+          requests:
+            cpu: 100m
+            memory: 300Mi
+          limits:
+            cpu: 400m
+            memory: 600Mi

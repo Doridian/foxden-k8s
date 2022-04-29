@@ -1,0 +1,96 @@
+---
+apiVersion: databases.spotahome.com/v1
+kind: RedisFailover
+metadata:
+  name: mastodon-redis
+spec:
+  sentinel:
+    replicas: 3
+    resources:
+      requests:
+        cpu: 100m
+      limits:
+        memory: 100Mi
+  redis:
+    replicas: 3
+    resources:
+      requests:
+        cpu: 100m
+        memory: 100Mi
+      limits:
+        cpu: 400m
+        memory: 500Mi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mastodon-redis-proxy-config
+data:
+  parameters.yaml: |
+    log_level: info
+    requests_timeout_in_seconds: 15
+
+    graylog.host:
+    graylog.port:
+
+    sentinel_list:
+      - rfs-mastodon-redis:26379
+    db_list:
+      main:
+        dbname: mymaster
+        local_port: 6379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mastodon-redis-proxy
+  labels:
+    app: mastodon-redis-proxy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mastodon-redis-proxy
+  template:
+    metadata:
+      labels:
+        app: mastodon-redis-proxy
+    spec:
+      containers:
+      - name: mastodon-redis-proxy
+        image: ghcr.io/doridian/sentinel-proxy/sentinel-proxy:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - name: redis-proxy-config
+          mountPath: /app/config
+      volumes:
+      - name: redis-proxy-config
+        configMap:
+          name: mastodon-redis-proxy-config
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: "app"
+                operator: In
+                values:
+                - mastodon-redis-proxy
+            topologyKey: "kubernetes.io/hostname"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mastodon-redis-proxy
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: mastodon-redis-proxy
+    port: 6379
+    targetPort: 6379
+    protocol: TCP 
+  selector:
+    app: mastodon-redis-proxy

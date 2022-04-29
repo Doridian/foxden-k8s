@@ -1,0 +1,26 @@
+apiVersion: "acid.zalan.do/v1"
+kind: postgresql
+metadata:
+  name: acid-postgresql
+spec:
+  teamId: "acid"
+  volume:
+    size: 10Gi
+    storageClass: vultr-block-storage
+  numberOfInstances: 3
+  patroni:
+    pg_hba:
+    - local all all trust
+    - host all all 0.0.0.0/0 md5
+    - host all all ::/0 md5
+    - local replication standby trust
+    - host replication standby all md5
+  users:
+    doridian:
+    - superuser
+    - createdb
+    mastodon: []
+  databases:
+    mastodon_production: mastodon
+  postgresql:
+    version: "14"

@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mastodon-streaming
+  labels:
+    app: mastodon-streaming
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mastodon-streaming
+  template:
+    metadata:
+      labels:
+        app: mastodon-streaming
+    spec:
+      containers:
+      - name: mastodon-streaming
+        image: ghcr.io/doridian/mastodon-docker/mastodon-docker
+        command: ["node", "./streaming"]
+        readinessProbe:
+          httpGet:
+            path: /api/v1/streaming/health
+            port: 4000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        ports:
+        - containerPort: 4000
+        envFrom:
+        - secretRef:
+            name: mastodon-env
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 400m
+            memory: 200Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mastodon-streaming
+  labels:
+    app: mastodon-streaming
+spec:
+  selector:
+    app: mastodon-streaming
+  ports:
+    - port: 4000
+      targetPort: 4000
+  clusterIP: None
+  type: ClusterIP
