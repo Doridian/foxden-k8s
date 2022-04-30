@@ -10,9 +10,7 @@ spec:
   - from:
     - podSelector: {}
   - from:
-    - namespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: mastodon
+    - namespaceSelector: {}
     ports:
     - protocol: TCP
       port: 5432
