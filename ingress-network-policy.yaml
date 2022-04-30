@@ -16,5 +16,3 @@ spec:
         cidr: 10.1.96.10/32
     - ipBlock:
         cidr: 10.1.96.11/32
-  - from:
-      podSelector: {}
