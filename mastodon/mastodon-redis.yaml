@@ -115,10 +115,7 @@ spec:
           app: mastodon-streaming
     - podSelector:
         matchLabels:
-          app: mastodon-sidekiq-default
-    - podSelector:
-        matchLabels:
-          app: mastodon-sidekiq-scheduler
+          appType: mastodon-sidekiq
     ports:
     - protocol: TCP
       port: 6379
@@ -130,7 +127,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      name: mastodon-redis
+      app.kubernetes.io/name: mastodon-redis
   policyTypes:
   - Ingress
   ingress:
@@ -141,8 +138,3 @@ spec:
     - podSelector:
         matchLabels:
           app.kubernetes.io/name: mastodon-redis
-    ports:
-    - protocol: TCP
-      port: 6379
-    - protocol: TCP
-      port: 26379
