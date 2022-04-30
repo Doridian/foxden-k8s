@@ -4,11 +4,12 @@ metadata:
   name: ingress-network-policy
   namespace: ingress-nginx
 spec:
-  podSelector:
-    matchLabels: {}
+  podSelector: {}
   policyTypes:
   - Ingress
   ingress:
+  - from:
+      - podSelector: {}
   - from:
     - ipBlock:
         cidr: 10.1.96.9/32
