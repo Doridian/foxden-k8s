@@ -3,22 +3,17 @@ kind: Ingress
 metadata:
   name: mastodon-web-ingress
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/affinity: cookie
     nginx.ingress.kubernetes.io/session-cookie-path: /
     nginx.ingress.kubernetes.io/session-cookie-change-on-failure: 'true'
+    nginx.ingress.kubernetes.io/proxy-body-size: 80m
+    nginx.ingress.kubernetes.io/from-to-www-redirect: 'true'
 spec:
   ingressClassName: nginx
-  defaultBackend:
-    service:
-      name: mastodon-web
-      port:
-        number: 3000
   tls:
   - hosts:
       - f0x.es
       - www.f0x.es
-      - mastodon.f0x.es
     secretName: mastodon-cert
   rules:
   - host: f0x.es
@@ -35,9 +30,33 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/permanent-redirect: https://f0x.es
+    nginx.ingress.kubernetes.io/permanent-redirect-code: '308'
+  name: mastodon-redirect-ingress
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+      - mastodon.f0x.es
+    secretName: mastodon-cert
+  rules:
+  - host: '*.f0x.es'
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: invalid-backend
+            port:
+              number: 1
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
   name: mastodon-assets-ingress
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, HEAD"
     nginx.ingress.kubernetes.io/cors-allow-origin: "https://f0x.es"
@@ -64,7 +83,6 @@ kind: Ingress
 metadata:
   name: mastodon-streaming-ingress
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/server-snippets: |
       location / {
         proxy_set_header Upgrade $http_upgrade;

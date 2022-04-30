@@ -3,17 +3,11 @@ kind: Ingress
 metadata:
   name: mastodon-twitter-poster-web-ingress
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/affinity: cookie
     nginx.ingress.kubernetes.io/session-cookie-path: /
     nginx.ingress.kubernetes.io/session-cookie-change-on-failure: 'true'
 spec:
   ingressClassName: nginx
-  defaultBackend:
-    service:
-      name: mastodon-twitter-poster-web
-      port:
-        number: 3000
   tls:
   - hosts:
       - crossposter.f0x.es

@@ -7,7 +7,7 @@ helm repo update
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.0/cert-manager.crds.yaml
 helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.8.0
 
-helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace
+helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --set controller.publishService.enabled=true --set-string controller.config.use-forward-headers=true,controller.config.compute-full-forward-for=true,controller.config.use-proxy-protocol=true --set controller.service.annotations."service\.beta\.kubernetes\.io/vultr-loadbalancer-proxy-protocol=true" --namespace ingress-nginx --create-namespace
 
 kubectl create namespace postgresql
 helm install postgres-operator postgres-operator-charts/postgres-operator --namespace=postgresql
