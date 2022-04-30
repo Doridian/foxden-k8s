@@ -48,3 +48,22 @@ spec:
       targetPort: 3131
   clusterIP: None
   type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mastodon-static-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: mastodon-static
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 3131
