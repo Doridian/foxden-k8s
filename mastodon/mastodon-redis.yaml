@@ -116,6 +116,12 @@ spec:
     - podSelector:
         matchLabels:
           appType: mastodon-sidekiq
+    - podSelector:
+        matchLabels:
+          app: mastodon-twitter-poster-web
+    - podSelector:
+        matchLabels:
+          app: mastodon-twitter-poster-sidekiq-default
     ports:
     - protocol: TCP
       port: 6379
